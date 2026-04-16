@@ -1,51 +1,28 @@
-name: Brahmastra_Ultimate_Build
-
+name: Brahmastra_Final_Build
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # 🔱 Hacker Trick: Isse aap manually button daba kar build shuru kar sakte ho
+  workflow_dispatch: # 🔱 Ye hai wo button jo aapko chahiye
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Install System Dependencies
+      - uses: actions/checkout@v4
+      - name: Setup System
         run: |
           sudo apt update
-          # Sari zaruri files ek saath install
           sudo apt install -y python3-pip build-essential git python3 python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libssl-dev libjpeg-dev zlib1g-dev libffi8 liblzma-dev uuid-dev openjdk-17-jdk
-
-      - name: Setup Buildozer & Cython
+      - name: Build APK
         run: |
-          # Cython ka wahi version jo stable hai
           pip3 install --user --upgrade buildozer cython==0.29.36 virtualenv
           export PATH=$PATH:$HOME/.local/bin
-
-      - name: Build Android APK (The Brahmastra Way)
-        run: |
-          export PATH=$PATH:$HOME/.local/bin
-          # Force build command with 404 error protection
+          # Force build
           yes | buildozer android debug || yes | buildozer android debug
-          
-          # 🔱 MAGIC COMMAND: APK ko dhoond kar root mein lana
-          echo "Hunting for APK..."
-          find . -name "*.apk" -exec cp {} ./brahmastra_final.apk \;
-          
-          # Check if file exists
-          if [ -f ./brahmastra_final.apk ]; then
-            echo "APK FOUND!"
-          else
-            echo "APK NOT FOUND"
-            exit 1
-          fi
-
-      - name: Upload Brahmastra APK
+          # Find APK and rename
+          find . -name "*.apk" -exec cp {} ./brahmastra_app.apk \;
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: Brahmastra-Official-App
-          # Seedha wahi file jo humne 'find' karke nikali hai
-          path: brahmastra_final.apk
-
+          name: Download_Brahmastra_APK
+          path: brahmastra_app.apk
